@@ -1,0 +1,38 @@
+<div style="max-width: 600px; margin: 30px auto; font-family: Arial, sans-serif;">
+  <h2>Banking MS - Dashboard</h2>
+
+  @if (!authServices.isAuthenticated()) {
+    <div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px;">
+      <h3>Iniciar Sesión</h3>
+      <input [(ngModel)]="user" placeholder="Usuario" style="display:block; width:100%; margin-bottom:8px; padding:8px;">
+      <input [(ngModel)]="password" type="password" placeholder="Contraseña" style="display:block; width:100%; margin-bottom:8px; padding:8px;">
+      <button (click)="onLogin()" style="padding: 8px 16px;">Ingresar</button>
+    </div>
+  } @else {
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <span style="color: green; font-weight: bold;">● Sesión Activa</span>
+      <button (click)="onLogout()" style="padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 4px;">Cerrar Sesión</button>
+    </div>
+
+    <div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+      <h3>Consultar Dashboard</h3>
+      <input [(ngModel)]="clientId" placeholder="ID de Cliente" style="display:block; width:100%; margin-bottom:8px; padding:8px;">
+      <button (click)="onGetDashboard()" style="padding: 8px 16px;">Consultar</button>
+
+      @if (dashboardData) {
+        <pre style="background:#f4f4f4; padding:10px; margin-top:10px;">{{ dashboardData | json }}</pre>
+      }
+    </div>
+    
+    <div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px;">
+      <h3>Utilidad Base64</h3>
+      <input [(ngModel)]="base64Input" placeholder="Texto a procesar" style="display:block; width:100%; margin-bottom:8px; padding:8px;">
+      <button (click)="onBase64('encode')" style="margin-right:10px; padding: 8px 16px;">Encode</button>
+      <button (click)="onBase64('decode')" style="padding: 8px 16px;">Decode</button>
+
+      @if (base64Result) {
+        <p><strong>Resultado:</strong> {{ base64Result }}</p>
+      }
+    </div>
+  }
+</div>
