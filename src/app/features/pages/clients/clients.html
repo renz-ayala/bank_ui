@@ -1,38 +1,94 @@
-<div style="max-width: 600px; margin: 30px auto; font-family: Arial, sans-serif;">
-  <h2>Banking MS - Dashboard</h2>
+<div class="container">
+  <header class="header">
+    <h2>Banca MS - Panel de Pruebas</h2>
+    @if (authServices.isAuthenticated()) {
+      <div>
+        <span>Estado: <strong>Conectado</strong></span>
+        <button (click)="onLogout()">Cerrar Sesión</button>
+      </div>
+    }
+  </header>
 
-  @if (!authServices.isAuthenticated()) {
-    <div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px;">
-      <h3>Iniciar Sesión</h3>
-      <input [(ngModel)]="user" placeholder="Usuario" style="display:block; width:100%; margin-bottom:8px; padding:8px;">
-      <input [(ngModel)]="password" type="password" placeholder="Contraseña" style="display:block; width:100%; margin-bottom:8px; padding:8px;">
-      <button (click)="onLogin()" style="padding: 8px 16px;">Ingresar</button>
-    </div>
-  } @else {
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <span style="color: green; font-weight: bold;">● Sesión Activa</span>
-      <button (click)="onLogout()" style="padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 4px;">Cerrar Sesión</button>
-    </div>
+  <hr>
 
-    <div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-      <h3>Consultar Dashboard</h3>
-      <input [(ngModel)]="clientId" placeholder="ID de Cliente" style="display:block; width:100%; margin-bottom:8px; padding:8px;">
-      <button (click)="onGetDashboard()" style="padding: 8px 16px;">Consultar</button>
+  <div class="main-layout">
 
-      @if (dashboardData) {
-        <pre style="background:#f4f4f4; padding:10px; margin-top:10px;">{{ dashboardData | json }}</pre>
+    <main class="column">
+      <h3>Operaciones Protegidas (Requieren Token)</h3>
+
+      @if (!authServices.isAuthenticated()) {
+        <section class="section">
+          <h4>1. Iniciar Sesión (Ingresa Base64 de user:pass)</h4>
+          <div class="field-group">
+            <label>Credenciales en Base64:</label>
+            <input [(ngModel)]="base64Auth" placeholder="Ej: dXNlcjpwYXNz">
+          </div>
+          <button (click)="onLogin()">Ingresar</button>
+        </section>
+      } @else {
+        <section class="section">
+          <h4>2. Consulta de Dashboard</h4>
+          <div class="field-group">
+            <label>ID de Cliente:</label>
+            <input [(ngModel)]="clientId" placeholder="Ej: CLI-123">
+          </div>
+          <div style="margin-bottom: 10px;">
+            <label>
+              <input type="checkbox" [(ngModel)]="sendEncrypted" style="width: auto; display: inline;">
+              Encriptar ID con CryptUtil antes de enviar
+            </label>
+          </div>
+          <button (click)="onGetDashboard()">Consultar</button>
+
+          <div class="resultado-box">
+            <h5>Respuesta JSON:</h5>
+            <pre>{{ dashboardData ? (dashboardData | json) : 'Sin datos' }}</pre>
+          </div>
+        </section>
+
+        <section class="section">
+          <h4>3. CryptUtil (Encriptación / Desencriptación)</h4>
+          <div class="field-group">
+            <label>Entrada:</label>
+            <input [(ngModel)]="cryptoInput" placeholder="Texto para CryptUtil">
+          </div>
+          <div class="button-group">
+            <button (click)="onEncrypt()">Encriptar</button>
+            <button (click)="onDecrypt()">Desencriptar</button>
+          </div>
+          <div class="field-group">
+            <label>Resultado:</label>
+            <div class="input-with-button">
+              <input [value]="cryptoResult" readonly placeholder="El resultado aparecerá aquí">
+              <button (click)="copyToClipboard(cryptoResult)" [disabled]="!cryptoResult">Copiar</button>
+            </div>
+          </div>
+        </section>
       }
-    </div>
-    
-    <div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px;">
-      <h3>Utilidad Base64</h3>
-      <input [(ngModel)]="base64Input" placeholder="Texto a procesar" style="display:block; width:100%; margin-bottom:8px; padding:8px;">
-      <button (click)="onBase64('encode')" style="margin-right:10px; padding: 8px 16px;">Encode</button>
-      <button (click)="onBase64('decode')" style="padding: 8px 16px;">Decode</button>
+    </main>
 
-      @if (base64Result) {
-        <p><strong>Resultado:</strong> {{ base64Result }}</p>
-      }
-    </div>
-  }
+    <aside class="column">
+      <h3>Herramientas Libres (Sin Token)</h3>
+
+      <section class="section">
+        <h4>Base64 (Encode / Decode)</h4>
+        <div class="field-group">
+          <label>Entrada (ej: usuario:contraseña):</label>
+          <input [(ngModel)]="base64Input" placeholder="Texto a procesar">
+        </div>
+        <div class="button-group">
+          <button (click)="onBase64('encode')">Encode</button>
+          <button (click)="onBase64('decode')">Decode</button>
+        </div>
+        <div class="field-group">
+          <label>Resultado Base64:</label>
+          <div class="input-with-button">
+            <input [value]="base64Result" readonly placeholder="El resultado aparecerá aquí">
+            <button (click)="copyToClipboard(base64Result)" [disabled]="!base64Result">Copiar</button>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+  </div>
 </div>

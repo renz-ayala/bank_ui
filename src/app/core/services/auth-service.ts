@@ -8,13 +8,11 @@ import { environment } from '../../../environments/environment';
 })
 export class AuthService {
   private http = inject(HttpClient);
-
   token = signal<string | null>(localStorage.getItem('token'));
 
-  login(user: string, pass: string): Observable<string> {
-    const credentials = btoa(`${user}:${pass}`);
+  login(base64Credentials: string): Observable<string> {
     const headers = new HttpHeaders({
-      Authorization: `Basic ${credentials}`,
+      Authorization: `Basic ${base64Credentials}`,
     });
 
     return this.http

@@ -6,9 +6,16 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const token = authService.token();
 
-  if (token && !req.url.includes('login')) {
+  // Excluir endpoints públicos que no deben llevar el Bearer JWT
+  const isExcluded =
+    req.url.includes('/v1/login') || req.url.includes('/v1/banca/dashboard/base64');
+
+  if (token && !isExcluded) {
     const authReq = req.clone({
-      headers: req.headers.set('Authorization', `Bearer ${token}`),
+      headers: req.headers.set(
+        'Authorization',
+        token.startsWith('Bearer ') ? token : `Bearer ${token}`,
+      ),
     });
     return next(authReq);
   }
