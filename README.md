@@ -6,7 +6,9 @@ Interfaz web minimalista diseñada para visualizar y consumir de forma interacti
 
 ## Repositorios Relacionados
 
-* **Backend / Microservicios:** [banking-ms](https://github.com/renz-ayala/banking-ms) (Contiene los servicios BFF, Clientes, Productos y Docker Compose).
+* **MS BFF:** [ms_bff](https://github.com/renz-ayala/banking_ms_bff)
+* **MS Clients:** [ms_clients](https://github.com/renz-ayala/banking_ms_clients)
+* **MS Products:** [ms_products](https://github.com/renz-ayala/banking_ms_products)
 * **Starter Criptográfico:** [greckrypto_starter](https://github.com/renz-ayala/greckrypto_starter)
 
 ---
@@ -42,3 +44,12 @@ Una vez autenticado, puede consultar información financiera de prueba utilizand
 * `003492018`
 * `000049182`
 * `001849203`
+
+## Si desea usarlo de forma local
+
+Descargue el repositorio
+ejecute 
+```bash
+npm install
+npm start
+```
