@@ -8,6 +8,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  .status-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
 }
 
 .main-layout {
@@ -26,16 +32,39 @@
   padding: 15px;
   margin-bottom: 15px;
   border-radius: 4px;
+  background-color: #fff;
+
+  h4 {
+    margin-top: 0;
+    margin-bottom: 12px;
+  }
 }
 
 .field-group {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 
   label {
     display: block;
     font-size: 12px;
     font-weight: bold;
     margin-bottom: 4px;
+  }
+}
+
+.checkbox-group {
+  margin-bottom: 12px;
+
+  label {
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+
+    input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+    }
   }
 }
 
@@ -46,7 +75,6 @@
   input {
     flex: 1;
     margin-bottom: 0;
-    background-color: #f9f9f9;
   }
 }
 
@@ -55,18 +83,28 @@
   background-color: #f0f0f0;
   padding: 10px;
   border-radius: 4px;
+
+  h5 {
+    margin: 0 0 6px 0;
+  }
 }
 
 pre {
   white-space: pre-wrap;
   word-wrap: break-word;
+  margin: 0;
+  font-size: 12px;
 }
 
-input {
+input[type="text"],
+input[type="password"] {
   display: block;
   width: 100%;
   padding: 6px;
   box-sizing: border-box;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 .button-group {
@@ -77,6 +115,13 @@ button {
   padding: 6px 12px;
   cursor: pointer;
   margin-right: 5px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  background-color: #efefef;
+
+  &:hover:not(:disabled) {
+    background-color: #e0e0e0;
+  }
 
   &:disabled {
     cursor: not-allowed;

@@ -7,34 +7,35 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root',
 })
 export class AuthService {
-  private http = inject(HttpClient);
-  token = signal<string | null>(localStorage.getItem('token'));
+  http = inject(HttpClient);
+
+  private token = signal<string | null>(localStorage.getItem('token'));
+  tokenState = this.token.asReadonly();
+
+  private credentials = signal<string | null>(null);
+  credentialState = this.credentials.asReadonly();
 
   login(base64Credentials: string): Observable<string> {
-    const headers = new HttpHeaders({
-      Authorization: `Basic ${base64Credentials}`,
-    });
+    this.credentials.set(base64Credentials);
 
+    const uri = `${environment.apiUrl}/login`;
     return this.http
-      .get(`${environment.apiUrl}/login`, {
-        headers,
-        responseType: 'text',
-      })
+      .get(uri, { responseType: 'text', })
       .pipe(
         tap((jwt) => {
-          const bearerToken = jwt.startsWith('Bearer ') ? jwt : `Bearer ${jwt}`;
-          localStorage.setItem('token', bearerToken);
-          this.token.set(bearerToken);
+          localStorage.setItem('token', jwt);
+          this.token.set(jwt);
         }),
       );
   }
 
   logout() {
     localStorage.removeItem('token');
+    this.credentials.set(null);
     this.token.set(null);
   }
 
   isAuthenticated(): boolean {
-    return !!this.token();
+    return this.token() != null;
   }
 }

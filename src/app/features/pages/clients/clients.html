@@ -1,10 +1,11 @@
 <div class="container">
   <header class="header">
-    <h2>Banca MS - Panel de Pruebas</h2>
+    <h2>Panel de consulta</h2>
+
     @if (authServices.isAuthenticated()) {
-      <div>
+      <div class="status-box">
         <span>Estado: <strong>Conectado</strong></span>
-        <button (click)="onLogout()">Cerrar Sesión</button>
+        <button (click)="onLogout()" class="btn-logout">Cerrar Sesión</button>
       </div>
     }
   </header>
@@ -14,80 +15,224 @@
   <div class="main-layout">
 
     <main class="column">
-      <h3>Operaciones Protegidas (Requieren Token)</h3>
+      <h3>  Información de clientes</h3>
 
       @if (!authServices.isAuthenticated()) {
         <section class="section">
-          <h4>1. Iniciar Sesión (Ingresa Base64 de user:pass)</h4>
-          <div class="field-group">
-            <label>Credenciales en Base64:</label>
-            <input [(ngModel)]="base64Auth" placeholder="Ej: dXNlcjpwYXNz">
-          </div>
-          <button (click)="onLogin()">Ingresar</button>
+          <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+            <h4>Iniciar Sesión</h4>
+
+            <div class="field-group">
+              <label>Usuario:</label>
+              <input
+                formControlName="username"
+                type="text"
+                placeholder="Ej: admin"
+                required>
+            </div>
+
+            <div class="field-group">
+              <label>Contraseña:</label>
+              <div class="input-with-button">
+                <input
+                  [type]="typePassoword()"
+                  formControlName="password"
+                  placeholder="••••••••"
+                  required>
+                <button
+                  type="button"
+                  (click)="togglePassword()"
+                  class="btn-toggle-eye"
+                >
+                  @if (showPassword()) {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                      <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                  } @else {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  }
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              [appLoading]="isLoginLoading()"
+              [disabled]="loginForm.invalid">
+              @if (isLoginLoading()) {
+                Ingresando...
+              } @else {
+                Ingresar
+              }
+            </button>
+          </form>
         </section>
       } @else {
         <section class="section">
-          <h4>2. Consulta de Dashboard</h4>
-          <div class="field-group">
-            <label>ID de Cliente:</label>
-            <input [(ngModel)]="clientId" placeholder="Ej: CLI-123">
-          </div>
-          <div style="margin-bottom: 10px;">
-            <label>
-              <input type="checkbox" [(ngModel)]="sendEncrypted" style="width: auto; display: inline;">
-              Encriptar ID con CryptUtil antes de enviar
-            </label>
-          </div>
-          <button (click)="onGetDashboard()">Consultar</button>
+          <form [formGroup]="clientForm" (ngSubmit)="onGetDashboard()">
+            <div class="field-group">
+              <label>ID de Cliente:</label>
+              <input
+                formControlName="clientId"
+                placeholder="Ej: 001948201"
+                required
+              >
+            </div>
+
+            <button
+              type="submit"
+              [disabled]="clientForm.invalid"
+              [appLoading]="isClientLoading()"
+            >
+              @if (isClientLoading()) {
+                Consultando...
+              } @else {
+                Consultar
+              }
+            </button>
+          </form>
 
           <div class="resultado-box">
             <h5>Respuesta JSON:</h5>
-            <pre>{{ dashboardData ? (dashboardData | json) : 'Sin datos' }}</pre>
-          </div>
-        </section>
-
-        <section class="section">
-          <h4>3. CryptUtil (Encriptación / Desencriptación)</h4>
-          <div class="field-group">
-            <label>Entrada:</label>
-            <input [(ngModel)]="cryptoInput" placeholder="Texto para CryptUtil">
-          </div>
-          <div class="button-group">
-            <button (click)="onEncrypt()">Encriptar</button>
-            <button (click)="onDecrypt()">Desencriptar</button>
-          </div>
-          <div class="field-group">
-            <label>Resultado:</label>
-            <div class="input-with-button">
-              <input [value]="cryptoResult" readonly placeholder="El resultado aparecerá aquí">
-              <button (click)="copyToClipboard(cryptoResult)" [disabled]="!cryptoResult">Copiar</button>
-            </div>
+            <pre>{{ presentation() }}</pre>
           </div>
         </section>
       }
     </main>
 
     <aside class="column">
-      <h3>Herramientas Libres (Sin Token)</h3>
+      <h3>Seccion de criptografía</h3>
 
       <section class="section">
-        <h4>Base64 (Encode / Decode)</h4>
+        <h4>Base64</h4>
+
+        <form [formGroup]="base64Form">
+          <div class="field-group">
+            <label>Entrada (Texto a procesar):</label>
+            <input
+              formControlName="base64Input"
+              placeholder="Ingresar texto aquí..."
+              required
+            >
+          </div>
+
+          <div class="button-group">
+            <button
+              [appLoading]="isBase64Loading()"
+              (click)="onBase64('encode')"
+              [disabled]="base64Form.invalid">
+              Encode
+            </button>
+
+            <button
+              [appLoading]="isBase64Loading()"
+              (click)="onBase64('decode')"
+              [disabled]="base64Form.invalid">
+              Decode
+            </button>
+          </div>
+        </form>
+
         <div class="field-group">
-          <label>Entrada (ej: usuario:contraseña):</label>
-          <input [(ngModel)]="base64Input" placeholder="Texto a procesar">
-        </div>
-        <div class="button-group">
-          <button (click)="onBase64('encode')">Encode</button>
-          <button (click)="onBase64('decode')">Decode</button>
-        </div>
-        <div class="field-group">
-          <label>Resultado Base64:</label>
+          <label>Resultado:</label>
           <div class="input-with-button">
-            <input [value]="base64Result" readonly placeholder="El resultado aparecerá aquí">
-            <button (click)="copyToClipboard(base64Result)" [disabled]="!base64Result">Copiar</button>
+            <input
+              [value]="base64Result()"
+              placeholder="El resultado aparecerá aquí"
+              readonly
+            >
+
+            <button
+              (click)="copyToClipboard(base64Result())"
+              [disabled]="!base64Result()">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </button>
           </div>
         </div>
       </section>
+
+      @if (authServices.isAuthenticated()) {
+        <section class="section">
+          <h4>Encryption</h4>
+
+          <form [formGroup]="cryptoForm">
+            <div class="field-group">
+              <label>Entrada:</label>
+              <input
+                formControlName="cryptoInput"
+                placeholder="Ingresa texto aquí..."
+                required
+              >
+            </div>
+
+            <div class="button-group">
+              <button
+                [appLoading]="isCryptoLoading()"
+                (click)="onEncrypt()"
+                [disabled]="cryptoForm.invalid"
+              >
+                Encriptar
+              </button>
+
+              <button
+                [appLoading]="isCryptoLoading()"
+                (click)="onDecrypt()"
+                [disabled]="cryptoForm.invalid"
+              >
+                Desencriptar
+              </button>
+            </div>
+          </form>
+
+          <div class="field-group">
+            <label>Resultado:</label>
+            <div class="input-with-button">
+              <input
+                [value]="cryptoResult()"
+                placeholder="El resultado aparecerá aquí"
+                readonly
+              >
+
+              <button
+                (click)="copyToClipboard(cryptoResult())"
+                [disabled]="!cryptoResult()"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </section>
+      }
     </aside>
 
   </div>

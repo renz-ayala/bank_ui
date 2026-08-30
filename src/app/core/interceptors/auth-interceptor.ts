@@ -1,24 +1,38 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth-service';
+import { catchError, throwError } from 'rxjs';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
-  const token = authService.token();
 
-  // Excluir endpoints públicos que no deben llevar el Bearer JWT
-  const isExcluded =
-    req.url.includes('/v1/login') || req.url.includes('/v1/banca/dashboard/base64');
-
-  if (token && !isExcluded) {
-    const authReq = req.clone({
-      headers: req.headers.set(
-        'Authorization',
-        token.startsWith('Bearer ') ? token : `Bearer ${token}`,
-      ),
-    });
-    return next(authReq);
+  if (req.url.includes('v1/banca/dashboard/base64')) {
+    return next(req);
   }
 
-  return next(req);
+  if (req.url.includes('v1/login')) {
+    const credentials = authService.credentialState();
+    req = req.clone({
+      setHeaders: {
+        Authorization: `Basic ${credentials}`,
+      }
+    });
+    return next(req);
+  }
+
+  const token = authService.tokenState();
+  req = req.clone({
+    setHeaders: {
+      Authorization: `Bearer ${token}`,
+    }
+  })
+
+  return next(req).pipe(
+    catchError((error: HttpErrorResponse) => {
+      if (error.status === 401) {
+        authService.logout();
+      }
+      return throwError(() => error);
+    })
+  );
 };
