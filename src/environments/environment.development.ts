@@ -1,4 +1,4 @@
 export const environment = {
-  apiUrl: 'v1',
+  apiUrl: '/v1',
 };
 
